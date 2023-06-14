@@ -1,6 +1,7 @@
 import java.sql.*;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
 
 public class CompanyRepository {
     Map<String, String> env = System.getenv();
@@ -30,13 +31,21 @@ public class CompanyRepository {
 
     }
 
-    public void create(CompanyEntity company){
+    public void execInDb(Function<Connection, Boolean> foo) {
         try {
             Class.forName("org.postgresql.Driver");
-        }catch (ClassNotFoundException e){
+        } catch (ClassNotFoundException e){
             System.out.println(e.getMessage());
         }
         try (Connection con = DriverManager.getConnection("jdbc:postgresql://localhost:7432/stocks", POSTGRES_USER, POSTGRES_PASSWORD)){
+            foo.apply(con);
+        } catch (SQLException e){
+            System.out.println(e.getMessage());
+        }
+    }
+
+    public void create(CompanyEntity company) {
+        execInDb(con -> {
             String createEntity = """
                     INSERT INTO COMPANY (name, country, creation_date, stocks_count)
                     VALUES (?,?,?,?);
@@ -47,10 +56,32 @@ public class CompanyRepository {
                 preparedStat.setDate(3, Date.valueOf(company.creation_date()));
                 preparedStat.setInt(4,company.stocks_count());
                 preparedStat.executeUpdate();
+            } catch (SQLException e) {
+                return false;
             }
-        }catch (SQLException e){
-            System.out.println(e.getMessage());
-        }
+            return true;
+        });
+
+//        try {
+//            Class.forName("org.postgresql.Driver");
+//        } catch (ClassNotFoundException e){
+//            System.out.println(e.getMessage());
+//        }
+//        try (Connection con = DriverManager.getConnection("jdbc:postgresql://localhost:7432/stocks", POSTGRES_USER, POSTGRES_PASSWORD)){
+//            String createEntity = """
+//                    INSERT INTO COMPANY (name, country, creation_date, stocks_count)
+//                    VALUES (?,?,?,?);
+//                    """;
+//            try (PreparedStatement preparedStat = con.prepareStatement(createEntity)){
+//                preparedStat.setString(1,company.name());
+//                preparedStat.setString(2,company.country());
+//                preparedStat.setDate(3, Date.valueOf(company.creation_date()));
+//                preparedStat.setInt(4,company.stocks_count());
+//                preparedStat.executeUpdate();
+//            }
+//        } catch (SQLException e){
+//            System.out.println(e.getMessage());
+//        }
     }
     public Optional<CompanyEntity> read(int id){
         try{

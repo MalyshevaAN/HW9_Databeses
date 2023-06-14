@@ -6,6 +6,8 @@ public class StockRepository {
     Map<String, String> env = System.getenv();
     String POSTGRES_PASSWORD = env.get("POSTGRES_PASSWORD");
     String POSTGRES_USER = env.get("POSTGRES_USER");
+
+    String POSTGRES_HOST = env.get("POSTGRES_HOST");
     public StockRepository(){
         try {
             Class.forName("org.postgresql.Driver");

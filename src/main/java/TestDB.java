@@ -1,4 +1,5 @@
 import java.time.LocalDate;
+import java.util.Map;
 import java.util.Optional;
 
 
@@ -6,7 +7,7 @@ public class TestDB {
     public static void main(String[] args) {
         CompanyRepository newDBCompanies = new CompanyRepository();
         CompanyEntity company = new CompanyEntity("son", "Russia", LocalDate.of(2023, 1, 1), 1000);
-        //newDBCompanies.create(company);
+        newDBCompanies.create(company);
         StockRepository newDBStocks = new StockRepository();
         StockEntity stock = new StockEntity("hello", 1000, 1);
         //newDBStocks.create(stock);
@@ -21,6 +22,7 @@ public class TestDB {
         company1.ifPresent(companyEntity -> System.out.println(companyEntity.name()));
         CompanyEntity company2 = new CompanyEntity("somnus", "International", LocalDate.of(2023, 1, 11), 10000);
         newDBCompanies.update(1,company2);
-        newDBCompanies.delete(company);
+        Map<String, String> env = System.getenv();
+        System.out.println(env.get("POSTGRES_HOST"));
     }
 }
